@@ -76,31 +76,36 @@ plt.title("Training Loss")
 plt.xlabel("Batch")
 plt.ylabel("Loss")
 plt.show()
-# 載入最佳模型
 model.load_state_dict(torch.load('best_model.pth'))
 model.to(device)
 # 选择一些测试图像进行展示
-model.eval()  # 设置模型为评估模式
-dataiter = iter(test_loader)
-images, labels = next(dataiter)
+# 設置模型為評估模式
+model.eval()
+
+# 加載測試數據
+images, labels = next(iter(test_loader))
 images, labels = images.to(device), labels.to(device)
 
-# 获取预测
+# 獲取預測
 outputs = model(images)
 _, predicted = torch.max(outputs, 1)
 
-# 将图像转换回 CPU 并绘制
+# 將圖像轉換回 CPU
 images = images.cpu()
 predicted = predicted.cpu()
 labels = labels.cpu()
 
-fig, axes = plt.subplots(6, 6, figsize=(12, 12))
+# 繪製圖像
+fig, axes = plt.subplots(4, 4, figsize=(8, 8))
 fig.subplots_adjust(hspace=0.5, wspace=0.5)
 
 for i, ax in enumerate(axes.flat):
-    if i < 36:
-        img = images[i].numpy().squeeze()
-        ax.imshow(img, cmap="gray")
+    if i < 16:
+        # 將圖像轉換回28x28灰度圖像
+        img = transforms.Resize((28, 28))(images[i].unsqueeze(0))[0][0].numpy()  # 只取第一個通道
+        ax.imshow(img, cmap='gray')
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.set_title(f"True: {labels[i].item()}\nPred: {predicted[i].item()}")
+        ax.set_title(f"True: {labels[i].item()}\nPred: {predicted[i].item()}", fontsize=8)
+
+plt.show()
