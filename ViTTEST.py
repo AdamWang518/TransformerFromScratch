@@ -14,7 +14,7 @@ torch.cuda.empty_cache()
 
 # 数据预处理
 transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize((224, 224), antialias=True),
     transforms.Grayscale(num_output_channels=3), # 将灰度图像转换为三通道图像
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # 调整为三通道的正规化
@@ -48,7 +48,25 @@ model.to(device)
 # 設置模型為評估模式
 model.eval()
 
+# 初始化统计数据
+correct = 0
+total = 0
+
+# 不计算梯度，节省内存和计算资源
+with torch.no_grad():
+    for data in test_loader:
+        images, labels = data
+        images, labels = images.to(device), labels.to(device)
+        outputs = model(images)
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+# 计算准确度
+accuracy = 100 * correct / total
+print(f'Accuracy of the model on the 10000 test images: {accuracy:.2f}%')
 # 加載測試數據
+
 images, labels = next(iter(test_loader))
 images, labels = images.to(device), labels.to(device)
 
@@ -68,7 +86,7 @@ fig.subplots_adjust(hspace=0.5, wspace=0.5)
 for i, ax in enumerate(axes.flat):
     if i < 16:
         # 將圖像轉換回28x28灰度圖像
-        img = transforms.Resize((28, 28))(images[i].unsqueeze(0))[0][0].numpy()  # 只取第一個通道
+        img = transforms.Resize((28, 28), antialias=True)(images[i].unsqueeze(0))[0][0].numpy()  # 只取第一個通道
         ax.imshow(img, cmap='gray')
         ax.set_xticks([])
         ax.set_yticks([])

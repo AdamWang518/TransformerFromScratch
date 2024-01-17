@@ -14,7 +14,7 @@ torch.cuda.empty_cache()
 
 # 数据预处理
 transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize((224, 224), antialias=True),
     transforms.Grayscale(num_output_channels=3), # 将灰度图像转换为三通道图像
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # 调整为三通道的正规化
